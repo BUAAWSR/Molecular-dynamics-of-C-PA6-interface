@@ -1,0 +1,6 @@
+git init
+git add --all
+git status
+git commit -m "first commit"
+
+https://github.com/login/device
