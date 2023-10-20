@@ -1,0 +1,187 @@
+#---------------PA6+Graphene interface forming process---------------#
+# Author: Shenru Wang
+# Beihang University
+# srwang@buaa.edu.cn
+#--------------------------------------------------#
+
+#-------------------------------Description-----------------------------------#
+# The equilibrated graphene and PA6 models were combined.
+# PA6 was positioned above graphene and the distance between them was 7.5 Å 
+# which was less than the cutoff radius of non-bonded forces. 
+# The bottom layer of graphene and the top atoms of PA6 were then fixed, 
+# while allowing enough free atoms to facilitate the formation of an interface.
+
+# The interface forming process comprises two main stages: 
+# the heating process and the cooling process. 
+# The heating process simulation was conducted at different temperatures 
+# (450 K, 475K, 500 K, 525K, and 550 K) using the NVT ensemble, with a total simulation time of 1 ns. 
+# After that, the C/PA6 system was gradually cooled down to 300 K to simulate the cooling process.
+
+# ***** Use different files to simulate the interface forming process.
+# ***** Just change the temperature set (450 K, 475K, 500 K, 525K, and 550 K) in this file.
+# ***** This file calculates data at 500K.
+
+# This is a LAMMPS code.
+# All the detailed descriptions of the commands involved in this code
+# can be found in the LAMMPS website.
+#--------------------------------------------------#
+
+#-----------------Initialization-------------------#
+# use "real" unit and simulate in 3d dimension
+units 		      real
+dimension 	   3
+atom_style    full 
+
+# periodic boundary condition in 3d dimensions
+boundary 	    p p p
+
+# pairwise neighbor list setting
+neighbor 		   2.0 bin
+neigh_modify  every 1 delay 0 check yes
+
+# timestep is 1fs
+timestep      1
+#-----------------Potential parameters-------------#
+# PA6 uses "pcff" potential and graphene uses "airebo" potential
+# the interaction between PA6 and graphene uses "pcff" potential
+pair_style		     hybrid lj/class2/coul/long 10.0 lj/class2/coul/long 10.0 airebo 2.0
+bond_style      	class2
+angle_style     	class2
+dihedral_style  	class2
+improper_style  	class2
+kspace_style	pppm 0.0001
+
+# read PA6 and graphene models
+# the graphene model is shift under the PA6 model with a distance between them around 7.5 Å
+read_data		PA6.data extra/atom/types 1
+read_data		Graphene.data add append offset 7 0 0 0 0 shift 0.0 0.0 -10.72
+
+# give potential parameters
+# potential parameters for PA6
+# use sixthpower formula calculating the parameters between atoms with various types
+pair_coeff 	1 1 lj/class2/coul/long 1 0.013 1.65
+pair_coeff 	2 2 lj/class2/coul/long 1 0.054 4.01
+pair_coeff 	3 3 lj/class2/coul/long 1 0.02 2.995
+pair_coeff 	4 4 lj/class2/coul/long 1 0.12 3.81
+pair_coeff 	5 5 lj/class2/coul/long 1 0.267 3.3
+pair_coeff 	6 6 lj/class2/coul/long 1 0.106 3.6
+pair_coeff 	7 7 lj/class2/coul/long 1 0.054 4.01
+
+pair_coeff 	1 2 lj/class2/coul/long 1 0.0037 3.5754
+pair_coeff 	1 3 lj/class2/coul/long 1 0.0052 2.6805
+pair_coeff 	2 3 lj/class2/coul/long 1 0.0233 3.6691
+pair_coeff 	1 4 lj/class2/coul/long 1 0.0064 3.3980
+pair_coeff 	2 4 lj/class2/coul/long 1 0.0796 3.9164
+pair_coeff 	3 4 lj/class2/coul/long 1 0.0385 3.5163
+pair_coeff 	1 5 lj/class2/coul/long 1 0.0145 2.9476
+pair_coeff 	2 5 lj/class2/coul/long 1 0.1021 3.7372
+pair_coeff 	3 5 lj/class2/coul/long 1 0.0701 3.1657
+pair_coeff 	4 5 lj/class2/coul/long 1 0.1636 3.5995
+pair_coeff 	1 6 lj/class2/coul/long 1 0.0071 3.2122
+pair_coeff 	2 6 lj/class2/coul/long 1 0.0719 3.8322
+pair_coeff 	3 6 lj/class2/coul/long 1 0.0398 3.3640
+pair_coeff 	4 6 lj/class2/coul/long 1 0.1112 3.7124
+pair_coeff 	5 6 lj/class2/coul/long 1 0.1627 3.4661
+pair_coeff 	1 7 lj/class2/coul/long 1 0.0037 3.5754
+pair_coeff 	2 7 lj/class2/coul/long 1 0.0540 4.0100
+pair_coeff 	3 7 lj/class2/coul/long 1 0.0233 3.6691
+pair_coeff 	4 7 lj/class2/coul/long 1 0.0796 3.9164
+pair_coeff 	5 7 lj/class2/coul/long 1 0.1021 3.7372
+pair_coeff 	6 7 lj/class2/coul/long 1 0.0719 3.8322
+
+# potential parameters for graphene
+# Because the atom type of graphene is "8", the parameters of types 1-7 are set NULL
+pair_coeff 	* * airebo CH.airebo NULL NULL NULL NULL NULL NULL NULL C
+
+# potential parameters for the interaciton between PA6 and graphene
+pair_coeff 	1 8 lj/class2/coul/long 2 0.0037 3.5754
+pair_coeff 	2 8 lj/class2/coul/long 2 0.054 4.01
+pair_coeff 	3 8 lj/class2/coul/long 2 0.0233 3.6691
+pair_coeff 	4 8 lj/class2/coul/long 2 0.0796 3.9164
+pair_coeff 	5 8 lj/class2/coul/long 2 0.1021 3.7372
+pair_coeff 	6 8 lj/class2/coul/long 2 0.0719 3.8322
+pair_coeff 	7 8 lj/class2/coul/long 2 0.0540 4.0100
+
+#------------------------Region setting-----------------------------#
+# atom types 1-7 belong to PA6 and type 8 belongs to graphene
+group		   PA type 1:7
+group		   graphene type 8
+
+# set the bottom region of graphene and top region of PA6
+region		  down block INF INF INF INF INF -22.72 units box
+group		   down region down
+region	  	up block INF INF INF INF 38 INF units box
+group		   up region up
+
+# "boundary" group is what will be fixed
+# "mobile" group is the simulation region of interface forming process
+group 		  boundary union up down
+group 		  mobile subtract all boundary
+
+# "PA1" is the part without constrain in PA6
+# "graphene1" is the part without constrain in graphene
+group 		  PA1 subtract PA up
+group 		  graphene1 subtract graphene down
+
+#-----------------Calculate setting----------------#
+# Temperature initialization
+# When calculating data at different temperatures, change this command.
+# (450 K, 475K, 500 K, 525K, and 550 K)
+velocity 	all create 500.0 1231
+
+# set fix of boundary group (top atoms of PA6 and bottom atoms of graphene)
+velocity		boundary set 0.0 0.0 0.0
+fix		     13 boundary setforce 0.0 0.0 0.0
+
+# calculation of interfacial bonding energy
+# c_interaction is the interfacial bonding energy
+compute 		interaction PA1 group/group graphene1 
+
+#----------------Thermodynamic data----------------#
+# compute the temperature of "mobile" group
+compute 		      mobileT mobile temp
+
+thermo_style	   custom step time temp c_interaction
+thermo_modify   temp mobileT
+thermo		        100
+
+#------------------Heating process-----------------#
+# This is a heating process with high temperature.
+# When calculating data at different temperatures, change this command.
+# (450 K, 475K, 500 K, 525K, and 550 K)
+
+# set nvt for "up", "down", and "mobile" groups, respectively.
+# nvt for 1ns
+dump		    1 all atom 1000 nvt.xyz
+fix 		    1 mobile nvt temp 500 500 100
+fix 		    2 down nvt temp 500 500 100
+fix 		    3 up nvt temp 500 500 100
+run		     1000000
+
+unfix     1
+unfix     2
+unfix     3
+
+# save data
+write_restart   restart.nvt
+write_data	    	ALL.data
+
+#------------------Cooling process-----------------#
+# Cool the system temperature from X to 300K.
+# X is equal to 450 K, 475K, 500 K, 525K, and 550 K, based on the heating process.
+# Here, temperature cools down from 500K to 450K.
+
+fix 		1 mobile nvt temp 500 300 100
+fix 		2 down nvt temp 500 300 100
+fix 		3 up nvt temp 500 300 100
+run		 400000
+
+fix 		1 mobile nvt temp 300 300 100
+fix 		2 down nvt temp 300 300 100
+fix 		3 up nvt temp 300 300 100
+run		 100000
+
+# save data
+write_restart   restart1.nvt
+write_data		    ALL1.data
+

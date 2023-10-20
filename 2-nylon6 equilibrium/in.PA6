@@ -1,0 +1,80 @@
+#---------------Nylon6 equilibrium---------------#
+# Author: Shenru Wang
+# Beihang University
+# srwang@buaa.edu.cn
+#--------------------------------------------------#
+
+#------------------Description---------------------#
+# The nylon6 model was equilibrated at 300K with
+# the NVE ensemble for 100 ps, followed by the NVT
+# ensemble for 1ns.
+
+# This model  consists of 40 polymer chains, with 10 repeat units in each chain.
+
+# This is a LAMMPS code.
+# All the detailed descriptions of the commands involved in this code
+# can be found in the LAMMPS website.
+#--------------------------------------------------#
+
+#-----------------Initialization-------------------#
+# use "real" unit and simulate in 3d dimension
+units 		      real
+dimension 	   3
+atom_style    full 
+
+# periodic boundary condition in 3d dimensions
+boundary 	    p p p
+
+# pairwise neighbor list setting
+neighbor 		   2.0 bin
+neigh_modify  every 1 delay 0 check yes
+
+# timestep is 1fs
+timestep      1
+#-----------------Potential parameters-------------#
+# set "pcff" potential for graphene model
+pair_style		     lj/class2/coul/long 10.0
+bond_style      	class2
+angle_style     	class2
+dihedral_style  	class2
+improper_style  	class2
+kspace_style	    pppm 0.0001
+
+# read the nylon6 model
+read_data		      nylon6.data
+
+#----------------Thermodynamic data----------------#
+thermo_style	 custom step time temp pe ke etotal density press pxx pyy pzz vol lx ly lz
+thermo		      100
+
+#----------------Energy minimization---------------#
+dump		        1 all atom 100 mini.xyz
+min_style     cg
+minimize		    1e-6 1e-6 10000 10000
+undump		      1
+reset_timestep 0
+
+#-------------------Equilibrium--------------------#
+velocity 		   all create 300.0 1231
+
+#--------NVE----------#
+# NVE for 100ps
+dump		        1 all atom 100 nve.xyz
+fix           1 all nve
+fix           2 all temp/berendsen 300 300 10
+run		         100000
+
+write_restart restart.nve
+undump		      1
+unfix 		      1
+unfix 		      2
+reset_timestep	0
+
+#--------NVT----------#
+# NVT for 1ns
+dump		        1 all atom 1000 nvt.xyz
+fix           1 all nvt temp 300 300 100 
+run		         1000000
+
+write_restart restart.nvt
+write_data	   PA6.data
